@@ -1,14 +1,60 @@
 import inquirer from "inquirer";
+import cTable from 'console.table';
 import mysql from 'mysql2';
 
+// Establish connection to your db from your local computer
 const db = mysql.createConnection(
     {
       host: 'localhost',
-      // MySQL username,
       user: 'root',
-      // TODO: Add MySQL password here
       password: 'password',
       database: 'employee_db'
     },
     console.log(`Connected to the movies_db database.`)
   );
+
+//   Function to initiate the app
+  const startApp = async () => {
+
+    // User options
+    const options = [
+      {
+        type: 'rawlist',
+        name: 'options',
+        message: 'What do you want to do?',
+        choices: ["view all departments", "view all roles", "view all employees", "add a department", "add a role", "add an employee", "update an employee role", "Quit"]
+      }]
+    const selectedOpt = await inquirer.prompt(options)
+  
+    // Calls appropriate function 
+    switch (selectedOpt.options) {
+      case "view all departments":
+        allDepartments();
+        break;
+      case "view all roles":// Value of foo matches this criteria; execution starts from here
+        allRoles();
+        break;
+      case "view all employees": // no break statement in 'case 0:' so this case will run as well
+        allEmployees();
+        break; // Break encountered; will not continue into 'case 2:'
+      case "add a department":
+        addDepartment();
+        break;
+      case "add a role":
+        addRole();
+        break;
+      case "add an employee":
+        addEmployee();
+        break;
+      case "update an employee role":
+        updateEmployee()
+        break;
+      case "Quit":
+        db.end();
+        break;
+    }
+   
+  }
+
+
+  startApp();
