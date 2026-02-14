@@ -56,5 +56,21 @@ const db = mysql.createConnection(
    
   }
 
+  //Displays all departments in a table
+  const allDepartments = async () => {
+    db.query("SELECT id, name FROM department", function (err, result, fields) {
+      if (err) throw err;
+      console.table(result);
+      startApp()
+    });
+  }
+// Displays all roles in a table
+  const allRoles = async () => {
+    db.query("SELECT roles.id, roles.title, department.name, roles.salary FROM roles JOIN department ON roles.department_id = department.id;", function (err, result, fields) {
+      if (err) throw err;
+      console.table(result);
+      startApp()
+    })
+  }
 
   startApp();
