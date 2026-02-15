@@ -186,4 +186,65 @@ const addDepartment = async () => {
         })
     })
   }
+
+  const addEmployee = async () => {
+    db.query("SELECT * FROM roles ", function (err, roles, fields) {
+      if (err) throw err;
+  
+      db.query(`SELECT e.id, CONCAT(e.first_name, " ", e.last_name) AS manager  FROM employee e `, function (err, employees, fields) {
+        if (err) throw err;
+  
+       const managerOpt = employees.map(arr => arr.manager)
+       managerOpt.unshift("None")
+  
+        inquirer
+          .prompt([
+            {
+              type: 'input',
+              name: 'first_name',
+              message: 'What is first name of the employee',
+            },
+            {
+              type: 'input',
+              name: 'last_name',
+              message: 'What is the last name of the employee ',
+            },
+            {
+              type: 'rawlist',
+              name: 'title',
+              message: 'What role does this employee belongs to ?',
+              choices: roles.map(arr => arr.title)
+            },
+            {
+              type: 'rawlist',
+              name: 'manager',
+              message: 'who is the employees manager ?',
+              choices: managerOpt
+            },
+          ])
+          .then((res) => {
+  
+            const foundRole = roles.find(roles => roles.title == res.title);
+  
+            if(res.manager.toLowerCase() === "none"){
+              console.log(res.manager)
+              res.manager = null
+              db.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ("${res.first_name}",  "${res.last_name}", ${foundRole.id}, ${res.manager});`, function (err, result, fields) {
+                if (err) throw err;
+                startApp()
+              })
+  
+            } else{
+            const foundManager = employees.find(employee => employee.manager == res.manager)
+            
+  
+            db.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ("${res.first_name}",  "${res.last_name}", ${foundRole.id}, ${foundManager.id});`, function (err, result, fields) {
+              if (err) throw err;
+              startApp()
+            })
+            }
+          })
+      })
+    })
+  }
   startApp();
