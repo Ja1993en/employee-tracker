@@ -122,9 +122,8 @@ const addDepartment = async () => {
 
     db.query(`SELECT * FROM department`, function (err, result, fields) {
       if (err) throw err;
-    
-      console.log(result);
-      add
+
+      inquirer
         .prompt([
           {
             type: 'input',
