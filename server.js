@@ -24,6 +24,8 @@ const db = mysql.createConnection(
         message: 'What do you want to do?',
         choices: ["view all departments", "view all roles", "view all employees", "add a department", "add a role", "add an employee", "update an employee role", "Quit"]
       }]
+
+    // Users selected option 
     const selectedOpt = await inquirer.prompt(options)
   
     // Calls appropriate function 
@@ -64,6 +66,7 @@ const db = mysql.createConnection(
       startApp()
     });
   }
+
 // Displays all roles in a table
   const allRoles = async () => {
     db.query("SELECT roles.id, roles.title, department.name, roles.salary FROM roles JOIN department ON roles.department_id = department.id;", function (err, result, fields) {
@@ -73,7 +76,7 @@ const db = mysql.createConnection(
     })
   }
 
-
+// Displays all employees
   const allEmployees = async () => {
     db.query(`SELECT 
       e.id AS employee_id,
@@ -93,44 +96,8 @@ const db = mysql.createConnection(
     });
 }
 
-const addRole = async () => {
 
-  db.query(`SELECT * FROM department`, function (err, result, fields) {
-    if (err) throw err;
-  
-    console.log(result);
-    inquirer
-      .prompt([
-        {
-          type: 'input',
-          name: 'role',
-          message: `What is the name of the role`,
-        },
-        {
-          type: 'input',
-          name: 'salary',
-          message: 'What is the salary of the role ',
-        },
-        {
-          type: 'rawlist',
-          name: 'department',
-          message: 'What department does the role belong to ',
-          choices: result.map(arr => arr.name),
-        }
-      ])
-      .then((answer) => {
-        const founddpt = result.find(dpt => dpt.name === answer.department)
-
-        db.query(`INSERT INTO roles (title, salary, department_id) VALUES ("${answer.role}",  ${answer.salary}, ${founddpt.id} );`, function (err, result, fields) {
-          if (err) throw err;
-          // console.log(table)/
-          startApp()
-        })
-      })
-  })
-}
-
-// Function to add department to db
+// Add department to db
 const addDepartment = async () => {
     inquirer
       .prompt([
@@ -150,13 +117,14 @@ const addDepartment = async () => {
       })
   }
 
+  // Adds role to db
   const addRole = async () => {
 
     db.query(`SELECT * FROM department`, function (err, result, fields) {
       if (err) throw err;
     
       console.log(result);
-      inquirer
+      add
         .prompt([
           {
             type: 'input',
@@ -180,13 +148,13 @@ const addDepartment = async () => {
   
           db.query(`INSERT INTO roles (title, salary, department_id) VALUES ("${answer.role}",  ${answer.salary}, ${founddpt.id} );`, function (err, result, fields) {
             if (err) throw err;
-            // console.log(table)/
             startApp()
           })
         })
     })
   }
 
+  //Add employee to db
   const addEmployee = async () => {
     db.query("SELECT * FROM roles ", function (err, roles, fields) {
       if (err) throw err;
@@ -244,6 +212,46 @@ const addDepartment = async () => {
             })
             }
           })
+      })
+    })
+  }
+
+
+const updateEmployee = async () => {
+    db.query(`SELECT e.id, CONCAT(e.first_name, " ", e.last_name) AS name  FROM employee e `, function (err, employees, fields) {
+      if (err) throw err;
+      // console.log(result);
+      db.query(`SELECT r.id, r.title FROM roles r`, function (err, roles, fields) {
+  
+        inquirer
+        .prompt([
+          {
+            type: 'rawlist',
+            name: 'employee',
+            message: `Which employee's role you want to update?`,
+            choices: employees.map(arr => arr.name)
+          },
+          {
+            type: 'rawlist',
+            name: 'roleOpt',
+            message: `Which role do you want to assign to the selected employee`,
+            choices: roles.map(arr => arr.title)
+          },
+        ])
+        .then((res) => {
+          const foundEmp = employees.find(emp => emp.name == res.employee)
+          const foundRole = roles.find( role => role.title == res.roleOpt)
+          foundEmp.id
+          console.log(foundRole)
+  
+          db.query(`UPDATE employee SET role_id = ${foundRole.id} WHERE id = ${foundEmp.id};`, function (err, result, field) {
+            if (err) throw err;
+            console.log(result)
+          })
+        })
+  
+  
+  
       })
     })
   }
