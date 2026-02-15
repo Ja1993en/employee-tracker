@@ -73,4 +73,23 @@ const db = mysql.createConnection(
     })
   }
 
+
+  const allEmployees = async () => {
+    db.query(`SELECT 
+      e.id AS employee_id,
+      e.first_name,
+      e.last_name,
+      r.title AS role_title,
+      d.name AS department_name,
+      r.salary,
+      CONCAT(m.first_name, ' ', m.last_name) AS manager_name
+      FROM employee AS e
+    INNER JOIN roles AS r ON e.role_id = r.id
+    INNER JOIN department AS d ON r.department_id = d.id
+    LEFT JOIN employee AS m ON e.manager_id = m.id;`, function (err, result, fields) {
+      if (err) throw err;
+      console.table(result);
+      startApp()
+    });
+}
   startApp();
