@@ -150,4 +150,40 @@ const addDepartment = async () => {
       })
   }
 
+  const addRole = async () => {
+
+    db.query(`SELECT * FROM department`, function (err, result, fields) {
+      if (err) throw err;
+    
+      console.log(result);
+      inquirer
+        .prompt([
+          {
+            type: 'input',
+            name: 'role',
+            message: `What is the name of the role`,
+          },
+          {
+            type: 'input',
+            name: 'salary',
+            message: 'What is the salary of the role ',
+          },
+          {
+            type: 'rawlist',
+            name: 'department',
+            message: 'What department does the role belong to ',
+            choices: result.map(arr => arr.name),
+          }
+        ])
+        .then((answer) => {
+          const founddpt = result.find(dpt => dpt.name === answer.department)
+  
+          db.query(`INSERT INTO roles (title, salary, department_id) VALUES ("${answer.role}",  ${answer.salary}, ${founddpt.id} );`, function (err, result, fields) {
+            if (err) throw err;
+            // console.log(table)/
+            startApp()
+          })
+        })
+    })
+  }
   startApp();
